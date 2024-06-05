@@ -105,7 +105,7 @@ export const allOrders = TryCatch(async(req,res,next)=>{
     
     await reduceStock(orderItems);
     const temp = order.orderItems.map((i)=>String(i.productId));
-    await invalidatesCache({ product:true,order:true,
+    invalidatesCache({ product:true,order:true,
       admin:true,userId:user,
       productId:temp,
    });
@@ -138,7 +138,7 @@ export const allOrders = TryCatch(async(req,res,next)=>{
 
  await order.save();
 
- await invalidatesCache({ product:false,order:true,admin:true,userId:order.user,orderId:String(order._id)});
+ invalidatesCache({ product:false,order:true,admin:true,userId:order.user,orderId:String(order._id)});
  
  return res.status(200).json({
    success:true,
@@ -156,7 +156,7 @@ export const deleteOrder = TryCatch(async(req,res,next)=>{
   
    await order.deleteOne();
   
-   await invalidatesCache({ product:false,order:true,admin:true
+   invalidatesCache({ product:false,order:true,admin:true
       ,userId:order.user,orderId:String(order._id)});
    
    return res.status(200).json({

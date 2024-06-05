@@ -10,7 +10,7 @@ export const adminOnly = TryCatch(async(req,res,next)=>{
     if(!id)return next(new ErrorHandler("Please login first",401));
     const user  = await User.findById(id);
     if(!user) return next(new ErrorHandler("Incorrect Id",401));
-    if(user.role !== "admin") return next(new ErrorHandler("Cannot Access",401));
+    if(user.role !== "admin") return next(new ErrorHandler("Cannot Access",403));
     //as we have not passed error so the next handler(middleware) in line would be called
     next();
 });

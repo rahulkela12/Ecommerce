@@ -12,7 +12,7 @@ export const connectDB = (url:string)=>{
 };
 
 
-export const invalidatesCache = async(
+export const invalidatesCache = (
    {product,order,admin,userId,orderId,productId}
    :InvalidatesCacheProps)=>{
    if(product){
@@ -30,6 +30,10 @@ export const invalidatesCache = async(
        myCache.del(ordersKeys);
    }
    if(admin){
+       myCache.del(["admin-stats",
+       "admin-pie-charts",
+       "admin-bar-charts",
+       "admin-line-charts"]);
 
    }
 };
@@ -43,3 +47,55 @@ export const reduceStock = async(orderItems:OrderItemType[])=>{
       await product.save();
    }
 };
+
+export const calculatePercentage = (thisMonth:number,lastMonth:number)=>{
+   if(lastMonth === 0)return thisMonth*100; 
+   const percent = (thisMonth/lastMonth)*100;
+    return Number(percent.toFixed(0));
+};
+
+export const getInventories = async({
+   categories,
+   productsCount,
+   }:{
+   categories:string[];
+   productsCount:number;
+   })=>{
+   const categoriesCountPromise =   categories.map((category) => 
+      Product.countDocuments({category}));
+       
+   const categoriesCount = await Promise.all(categoriesCountPromise);
+   
+   const categoryCount:Record<string,number>[] =  [];
+
+   categories.forEach((category , i) => {
+     categoryCount.push({
+         [category]:Math.round((categoriesCount[i]/productsCount) * 100),
+     });
+   });
+   return categoryCount; 
+}
+
+interface MyDocument extends Document{
+   createdAt:Date;
+}
+
+type FuncProps = {
+   length:number;
+   docArr:MyDocument[];
+   today:Date
+};
+
+export const getChartData = ({length,docArr,today}:FuncProps)=>{
+   const data = new Array(length).fill(0);
+
+   docArr.forEach((i)=>{
+     const creationDate =  i.createdAt;
+     const monthDiff = (today.getMonth() - creationDate.getMonth() + 12)%12;
+      if(monthDiff < length){
+         data[length-monthDiff-1] += 1;
+      }
+    });
+
+    return data;
+}
