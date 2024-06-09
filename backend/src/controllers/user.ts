@@ -12,7 +12,7 @@ export const newUser = TryCatch(async(
         if(user){
             return res.status(201).json({
                 success:true,
-                messgae:`Welcome ${user.name}`
+                message:`Welcome ${user.name}`
             }); 
         }
         if(!_id || !name || !email || !photo ||!gender ||!dob)
@@ -24,7 +24,7 @@ export const newUser = TryCatch(async(
        });
         return res.status(201).json({
             success:true,
-            messgae:`Welcome ${user.name}`
+            message:`Welcome ${user.name}`
         });
 });
 
