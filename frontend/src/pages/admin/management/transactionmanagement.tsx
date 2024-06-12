@@ -1,65 +1,82 @@
 import { FaTrash } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import { Skeleton } from "../../../components/Loader";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
-import { OrderItem } from "../../../models/types";
+import { useDeleteOrderMutation, useOrderDetailsQuery, useUpdateOrderMutation } from "../../../redux/api/orderAPI";
 import { server } from "../../../redux/store";
+import { UserReducerInitialState } from "../../../types/reducer-types";
+import { Order, OrderItem } from "../../../types/types";
+import { responseToast } from "../../../utils/features";
 
-const img =
-  "https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8c2hvZXN8ZW58MHx8MHx8&w=1000&q=804";
-
-const orderItems: OrderItem[] = [
-  {
-    name: "Puma Shoes",
-    photo: img,
-    id: "asdsaasdas",
-    quantity: 4,
-    price: 2000,
+const defaultData:Order = {
+  shippingInfo:{
+    address: "",
+    city: "",
+    state: "",
+    country: "",
+    pinCode: "",
   },
-];
-
+  user:{
+    _id:"",
+    name:"",
+  },
+  _id:"",
+  status: "",
+  subtotal: 0,
+  discount: 0,
+  shippingCharges: 0,
+  tax: 0,
+  total: 0,
+  orderItems:[],
+};
 const TransactionManagement = () => {
-  const [order, setOrder] = useState({
-    name: "Puma Shoes",
-    address: "77 black street",
-    city: "Neyword",
-    state: "Nevada",
-    country: "US",
-    pinCode: 242433,
-    status: "Processing",
-    subtotal: 4000,
-    discount: 1200,
-    shippingCharges: 0,
-    tax: 200,
-    total: 4000 + 200 + 0 - 1200,
-    orderItems,
-  });
 
-  const {
-    name,
-    address,
-    city,
-    country,
-    state,
-    pinCode,
-    subtotal,
-    shippingCharges,
-    tax,
-    discount,
-    total,
-    status,
-  } = order;
+  const {user} = useSelector((state:{userReducer:UserReducerInitialState})=>
+    state.userReducer
+   );
 
-  const updateHandler = (): void => {
-    setOrder((prev) => ({
-      ...prev,
-      status: "Shipped",
-    }));
+   const params = useParams();
+    const navigate = useNavigate();
+
+   const {data,isLoading,isError} = useOrderDetailsQuery(params.id!);
+    
+  const {shippingInfo:{address,city,state,country,pinCode}
+  ,orderItems,user:{name},status,tax,subtotal,
+  total,discount,shippingCharges
+} = data?.order || defaultData;
+  
+ 
+const [updateOrder] = useUpdateOrderMutation();
+const [deleteOrder] = useDeleteOrderMutation();
+
+  const updateHandler = async() => {
+    const res = await updateOrder({
+      userId:(user?._id) as string,
+      orderId:(data?.order._id) as string
+    });
+    responseToast(res,navigate,"/admin/transaction");
   };
+
+  const deleteHandler = async() =>{
+    const res = await deleteOrder({
+      userId:(user?._id) as string,
+      orderId:(data?.order._id) as string
+    });
+    responseToast(res,navigate,"/admin/transaction");
+  };
+
+
+  if(isError){
+    return <Navigate to={"/404"}/>
+  }
 
   return (
     <div className="admin-container">
       <AdminSidebar />
       <main className="product-management">
+      {isLoading?<Skeleton length={15}/>:(
+        <>
         <section
           style={{
             padding: "2rem",
@@ -116,6 +133,8 @@ const TransactionManagement = () => {
             Process Status
           </button>
         </article>
+      </>
+    )}
       </main>
     </div>
   );
@@ -126,11 +145,11 @@ const ProductCard = ({
   photo,
   price,
   quantity,
-  productId,
+  _id,
 }: OrderItem) => (
   <div className="transaction-product-card">
     <img src={photo} alt={name} />
-    <Link to={`/product/${productId}`}>{name}</Link>
+    <Link to={`${server}/api/v1/product/${_id}`}>{name}</Link>
     <span>
       ₹{price} X {quantity} = ₹{price * quantity}
     </span>

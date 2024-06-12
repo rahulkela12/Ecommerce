@@ -177,7 +177,7 @@ export const getDashboardStats = TryCatch(async(req,res,next)=>{
        stats = {
         categoryCount,
         changePercent,
-        count,
+        count, 
         chart:{
             order:orderMonthCounts,
             revenue:orderMonthRevenue,
@@ -258,7 +258,7 @@ export const getPieCharts = TryCatch(async(req,res,next)=>{
       discount,
       productionCost,
       burnt,
-      marketingCost,
+      marketingCost, 
      };
 
      const usersAgeGroup ={

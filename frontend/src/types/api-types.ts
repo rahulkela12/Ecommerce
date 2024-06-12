@@ -1,4 +1,4 @@
-import { Products, User } from "./types";
+import { Bar, CartItem, Line, Order, Pie, Products, ShippingInfo, Stats, User } from "./types";
 
 export type CustomError = {
     status:number;
@@ -11,6 +11,11 @@ export type CustomError = {
 export type MessageResponse = {
     success:boolean;
     message:string;
+} 
+
+export type AllUsersResponse = {
+    success:boolean;
+    users:User[];
 }
 
 export type UserResponse = {
@@ -34,6 +39,16 @@ export type SearchProductsResponse = {
     totalPage:number;
 }
 
+export type AllOrdersResponse = {
+    success:boolean;
+    orders:Order[];
+}
+
+export type OrderDetailResponse = {
+    success:boolean;
+    order:Order;
+}
+
 export type SearchProductsRequest = {
     price:number;
     page:number;
@@ -43,8 +58,28 @@ export type SearchProductsRequest = {
 }
 
 export type ProductResponse = {
-    success:boolean;
+    success:boolean; 
     product:Products;
+}
+
+export type StatsResponse = {
+    success:boolean;
+    stats:Stats;
+}
+
+export type PieResponse = {
+    success:boolean;
+    charts:Pie;
+}
+
+export type BarResponse = {
+    success:boolean;
+    charts:Bar;
+}
+
+export type LineResponse = {
+    success:boolean;
+    charts:Line;
 }
 
 export type NewProductRequest = {
@@ -60,3 +95,25 @@ export type DeleteProductRequest = {
     userId:string;
     productId:string;
 }
+export type NewOrderRequest = {
+    orderItems: CartItem[];
+    shippingInfo:ShippingInfo;
+    user:string;
+    subtotal:number;
+    tax:number;
+    shippingCharges:number;
+    discount:number;
+    total:number;
+}
+
+export type UpdateOrderRequest = {  
+    userId:string;
+    orderId:string;
+}
+
+export type DeleteUserRequest = {
+    userId:string;
+    adminUserId:string;
+}
+
+

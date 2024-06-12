@@ -1,51 +1,82 @@
+
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { VscError } from "react-icons/vsc";
-import CartItem from "../components/Cart-items";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-
-
-const cartItems = [
-  {
-    productID:"asdasda",
-    photo:"https://img.tatacliq.com/images/i7/658Wx734H/MP000000008740105_658Wx734H_202102091316351.jpeg",
-    name:"MacBook",
-    price:3000,
-    quantity:4,
-    stock:10,
-  }
-
-];
-const subtotal = 4000;
-const tax = Math.round(subtotal*0.18);
-const shippingCharges = 200;
-const discount = 400;
-const total = subtotal + tax + shippingCharges - discount;
+import CartItemCard from "../components/Cart-items";
+import { addToCart, calculatePrice, discountApplied, removeCartItem } from "../redux/reducer/cartReducer";
+import { RootState, server } from "../redux/store";
+import { CartItem } from "../types/types";
 
 const Cart = () => {
+
+  const {cartItems,shippingCharges,subtotal,tax,total,
+    discount} = 
+  useSelector((state:RootState)=>
+    state.cartReducer);
 
   const [couponCode,setCouponCode] = useState<string>("");
   const [isValidCouponCode,setIsValidCouponCode] = useState<boolean>(false);
 
+  const dispatch = useDispatch();
+
+  const incrementHandler = (cartItem:CartItem)=>{
+    if(cartItem.quantity >= cartItem.stock)return;
+    dispatch(addToCart({...cartItem,quantity:cartItem.quantity+1}));
+  };
+
+  const decrementHandler = (cartItem:CartItem)=>{
+    if(cartItem.quantity <= 1)return;
+    dispatch(addToCart({...cartItem,quantity:cartItem.quantity-1}));
+  };
+
+  const removeHandler = (productId:string)=>{
+    dispatch(removeCartItem(productId));
+  };
+
+
 useEffect(() => {
+
+  const {token,cancel} = axios.CancelToken.source()
+
   const TimeoutID = setTimeout(()=>{
-    if(Math.random()>0.5) setIsValidCouponCode(true);
-    else setIsValidCouponCode(false);
+
+    axios.get(`${server}/api/v1/payment/discount?coupon=${couponCode}`
+      ,{cancelToken:token}
+    )
+      .then((res)=>{
+        setIsValidCouponCode(true);
+        dispatch(discountApplied(res.data.discount));
+        dispatch((calculatePrice()));
+      })
+      .catch(()=>{
+        dispatch(discountApplied(0));
+        setIsValidCouponCode(false);
+        dispatch((calculatePrice()));
+      });
   },100);
 
   return () => {
     clearTimeout(TimeoutID);
+    cancel();
     setIsValidCouponCode(false);
   }
 }, [couponCode])
 
-
+useEffect(()=>{
+  dispatch((calculatePrice()))
+},[cartItems])
 
   return (
     <div className="cart">
       <main>
        {
         cartItems.length>0 ? cartItems.map((i,idx)=>
-          <CartItem
+          <CartItemCard
+           incrementHandler={incrementHandler}
+           decrementHandler={decrementHandler}
+           removeHandler={removeHandler}
           key={idx}
             cartItem={i}
           />) : <h1> No Items Added </h1>

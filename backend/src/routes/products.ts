@@ -17,5 +17,5 @@ app.get("/admin-products",adminOnly,getAdminProduct);
 
 app.route("/:id").get(getSingleProduct)
 .put(adminOnly,singleUpload,updateProduct)
-.delete(adminOnly,deleteProduct);
+.delete(adminOnly,deleteProduct); 
 export default app;

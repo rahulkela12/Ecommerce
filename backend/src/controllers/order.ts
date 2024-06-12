@@ -21,7 +21,7 @@ else{
 }
    return res.status(200).json({
    success:true,
-   message:orders
+   orders:orders
  }) 
 }
 );
@@ -41,7 +41,7 @@ export const allOrders = TryCatch(async(req,res,next)=>{
   }
      return res.status(200).json({
      success:true,
-     message:orders
+     orders:orders
    }) 
   }
   );
@@ -63,7 +63,7 @@ export const allOrders = TryCatch(async(req,res,next)=>{
    }
       return res.status(200).json({
       success:true,
-      message:order
+      order:order
     }) 
    }
    );
