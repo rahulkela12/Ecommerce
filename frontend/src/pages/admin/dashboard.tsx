@@ -10,12 +10,13 @@ import { BarChart, DoughnutChart } from "../../components/admin/Charts";
 import Table from "../../components/admin/DashboardTable";
 import { useStatsQuery } from "../../redux/api/dashboardAPI";
 import { RootState } from "../../redux/store";
+import { getLastMonths } from "../../utils/features";
 
 const userImg =
   "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJxA5cTf-5dh5Eusm0puHbvAhOrCRPtckzjA&usqp";
 
 const Dashboard = () => {
-
+  const {last6Month} = getLastMonths();
   const {user} = useSelector((state:RootState) => state.userReducer);
   const {isLoading,data,isError} = useStatsQuery(user?._id!);
 
@@ -74,6 +75,7 @@ const Dashboard = () => {
             <BarChart
               data_1={stats.chart.revenue}
               data_2={stats.chart.order}
+              labels={last6Month}
               title_1="Revenue"
               title_2="Transaction"
               bgColor_1="rgb(0, 115, 255)"
